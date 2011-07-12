@@ -2,9 +2,14 @@
 
 Thin wrapper around Evernote ruby client library (https://github.com/cgs/evernote)
 
+# Installing #
+
+    gem install evertone
+
 # Usage #
 
-    require 'lib/everton'
+    require 'rubygems'
+    require 'everton'
     
     config = {
       :username => 'myuser',
