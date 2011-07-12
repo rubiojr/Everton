@@ -4,7 +4,7 @@ Thin wrapper around Evernote ruby client library (https://github.com/cgs/evernot
 
 # Installing #
 
-    gem install evertone
+    gem install everton
 
 # Usage #
 
