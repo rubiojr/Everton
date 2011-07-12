@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler'
+require 'lib/everton'
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -12,16 +13,19 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "evertone"
-  gem.homepage = "http://github.com/rubiojr/evertone"
+  gem.version = Everton::VERSION
+  gem.name = "everton"
+  gem.homepage = "http://github.com/rubiojr/everton"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
-  gem.email = "sergio@rubio.name"
+  gem.summary = %Q{Thin wrapper around evernote ruby api}
+  gem.description = %Q{Thin wrapper around evernote ruby api}
+  gem.email = "rubiojr@frameos.org"
   gem.authors = ["Sergio Rubio"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
+  gem.add_runtime_dependency 'thrift_client', '= 0.6.0'
+  gem.add_runtime_dependency 'evernote', '>= 1.0'
+
   #  gem.add_development_dependency 'rspec', '> 1.2.3'
 end
 Jeweler::RubygemsDotOrgTasks.new
@@ -33,21 +37,14 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-end
-
-task :default => :test
+task :default => :build
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "evertone #{version}"
+  rdoc.title = "everton #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
