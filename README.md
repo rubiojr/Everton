@@ -8,6 +8,8 @@ Thin wrapper around Evernote ruby client library (https://github.com/cgs/evernot
 
 # Usage #
 
+You'll need an Evernote API key to use this library. Get yourself a "Client application" API key from Evernote (http://www.evernote.com/about/developer/api/#key). For more info, see https://github.com/cgs/evernote/blob/master/README.mkd
+
     require 'rubygems'
     require 'everton'
     
