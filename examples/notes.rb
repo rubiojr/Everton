@@ -26,5 +26,14 @@ n.find_notes('intitle:Aspirations').each do |note|
   puts note.title
 end
 
+#
+# Create a new text note
+#
+n.add_note('title', 'note body')
 
-
+#
+# Updating a note
+#
+note = n.find_notes.first
+note.title = 'new title'
+note.update

@@ -9,43 +9,15 @@ require 'uri'
 #
 
 module Evernote
-  module EDAM
-    module Type
-      class NoteFilter
-        include ::Thrift::Struct, ::Thrift::Struct_Union
-        ORDER = 1
-        ASCENDING = 2
-        WORDS = 3 
-        NOTEBOOKGUID = 4
-        TAGGUIDS = 5
-        TIMEZONE = 6
-        INACTIVE = 7
-
-        FIELDS = {
-                    ORDER => {:type => ::Thrift::Types::I32, :name => 'order', :optional => true},
-                    ASCENDING => {:type => ::Thrift::Types::BOOL, :name => 'ascending', :optional => true},
-                    WORDS => {:type => ::Thrift::Types::STRING, :name => 'words', :optional => true},
-                    NOTEBOOKGUID => {:type => ::Thrift::Types::STRING, :name => 'notebookGuid', :optional => true},
-                    TAGGUIDS => {:type => ::Thrift::Types::LIST, :name => 'tagGuids', :optional => true, :enum_class => Evernote::EDAM::Type::PrivilegeLevel},
-                    TIMEZONE => {:type => ::Thrift::Types::STRING, :name => 'timezone', :optional => true},
-                    INACTIVE => {:type => ::Thrift::Types::BOOL, :name => 'active', :optional => true}
-                  }
-
-         def struct_fields; FIELDS; end
-
-         def validate
-         end
-
-         ::Thrift::Struct.generate_accessors self
-      end
+  class UserStore
+    def validate_version
     end
   end
 end
 
-
 module Everton
 
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
 
   class Remote
     
@@ -71,8 +43,17 @@ module Everton
     end
   end
 
+  class ::Evernote::EDAM::Type::Note
+    def update
+      Everton::Remote.note_store.updateNote(Everton::Remote.access_token, self)
+    end
+  end
+
   class ::Evernote::EDAM::Type::Notebook
 
+    #
+    # Add a text note and return it
+    #
     def add_note(title, text)
       note = Evernote::EDAM::Type::Note.new()
       note.title = title
@@ -84,6 +65,9 @@ module Everton
       Everton::Remote.note_store.createNote(Everton::Remote.access_token, note)
     end
 
+    #
+    # Add an image note and return it
+    #
     def add_image(title, text, filename)
       image = File.open(filename, "rb") { |io| io.read }
       hashFunc = Digest::MD5.new
@@ -111,7 +95,6 @@ module Everton
       note.resources = [ resource ]
 
       Everton::Remote.note_store.createNote(Everton::Remote.access_token, note)
-
     end
     
     # See advanced search
@@ -121,7 +104,7 @@ module Everton
     #
     # http://www.evernote.com/about/developer/api/ref/NoteStore.html#Fn_NoteStore_findNotes
     def find_notes(filter=nil, params = {})
-      f = Evernote::EDAM::Type::NoteFilter.new()
+      f = Evernote::EDAM::NoteStore::NoteFilter.new()
       f.notebookGuid = self.guid
       f.words = filter if filter
       offset = params[:offset] || 0
@@ -134,6 +117,12 @@ module Everton
   class Notebook
     def self.all
       Remote.note_store.listNotebooks(Remote.access_token)
+    end
+
+    def self.create(name, params = {})
+      n = Evernote::EDAM::Type::Notebook.new()
+      n.name = name
+      Remote.note_store.createNotebook(Remote.access_token, n)
     end
 
     def self.find(name)
