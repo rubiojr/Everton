@@ -17,30 +17,49 @@ end
 
 module Everton
 
-  VERSION = '0.1.2'
+  VERSION = '0.1.3'
 
   class Remote
     
     class << self
-      attr_reader :user_store, :note_store, :access_token
+      attr_reader :user_store, :note_store, :shard_id
+      attr_accessor :access_token
     end
 
-    def self.authenticate config
+    # @config parameter format
+    #
+    # :username
+    # :password
+    # :access_token
+    # :user_store_url
+    #
+    # if @force is true, authenticate even if access_token found
+    #
+    def self.authenticate config, force=false
       if config.is_a? Hash
         cfg = config
       else
         cfg = YAML.load_file config
       end
-        @user_store = Evernote::UserStore.new(cfg[:user_store_url], cfg)
+      @user_store = Evernote::UserStore.new(cfg[:user_store_url], cfg)
+      # We have a token, assume it's valid
+      if not force and not config[:access_token].nil? and not config[:username].nil?
+        @user = config[:username]
+        @access_token = config[:access_token]
+        @shard_id = @access_token.split(':').first.split('=').last
+      else
         auth_result = user_store.authenticate
         @user = auth_result.user
         @access_token = auth_result.authenticationToken
-        uri = URI.parse cfg[:user_store_url]
-        host = uri.host
-        scheme = uri.scheme
-        @note_store_url = "#{scheme}://#{host}/edam/note/#{@user.shardId}"
-        @note_store = Evernote::NoteStore.new(@note_store_url)
+        @shard_id = @user.shardId
+      end
+      uri = URI.parse cfg[:user_store_url]
+      host = uri.host
+      scheme = uri.scheme
+      @note_store_url = "#{scheme}://#{host}/edam/note/#{@shard_id}"
+      @note_store = Evernote::NoteStore.new(@note_store_url)
     end
+
   end
 
   class ::Evernote::EDAM::Type::Note
